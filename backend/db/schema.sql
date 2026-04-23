@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS books;
+
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    image_url TEXT,
+    stock INTEGER DEFAULT 10
+);
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    book_id INTEGER REFERENCES books(id),
+    quantity INTEGER NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
