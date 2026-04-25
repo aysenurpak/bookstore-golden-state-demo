@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f8f9fa;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  height: 100vh;
+  width: 100vw;
+  overflow: auto;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
