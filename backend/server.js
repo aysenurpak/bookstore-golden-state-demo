@@ -162,6 +162,11 @@ app.put('/api/books/:id', authenticateToken, requireAdmin, async (req, res) => {
 app.delete('/api/books/:id', authenticateToken, requireAdmin, async (req, res) => {
     const { id } = req.params;
     try {
+        // Önce bu kitaba ait siparişleri sil
+        await pool.query('DELETE FROM orders WHERE book_id = $1', [id]);
+        // Sonra sepetten sil
+        await pool.query('DELETE FROM cart WHERE book_id = $1', [id]);
+        // Sonra kitabı sil
         const result = await pool.query('DELETE FROM books WHERE id = $1 RETURNING *', [id]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Kitap bulunamadı' });
         res.json({ message: 'Kitap silindi', deleted: result.rows[0] });
