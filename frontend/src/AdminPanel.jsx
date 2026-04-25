@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BookOpen, Home, Users, Package, Settings, LogOut, Plus, Trash2, Edit3, Save, X } from 'lucide-react';
+import { BookOpen, Home, Package, Settings, LogOut, Save } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend } from 'chart.js';
 
@@ -12,6 +12,7 @@ function AdminPanel({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('Home');
   const [books, setBooks] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [bookStats, setBookStats] = useState([]);
   const [editingBook, setEditingBook] = useState(null);
   const [newBook, setNewBook] = useState({ title: '', author: '', price: '', image_url: '', stock: '' });
 
@@ -19,22 +20,21 @@ function AdminPanel({ user, onLogout }) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   useEffect(() => {
-    if (token) {
-      refreshData();
-    }
+    if (token) refreshData();
   }, [token]);
 
   const refreshData = async () => {
     try {
-      const [bRes, oRes] = await Promise.all([
+      const [bRes, oRes, sRes] = await Promise.all([
         axios.get(`${API_URL}/books`),
-        axios.get(`${API_URL}/orders`, { headers })
+        axios.get(`${API_URL}/orders`, { headers }),
+        axios.get(`${API_URL}/stats/books`, { headers }),
       ]);
       setBooks(bRes.data);
       setOrders(oRes.data);
+      setBookStats(sRes.data);
     } catch (err) {
       console.error("Veri hatası:", err);
-      // Kitapları en azından göster
       try {
         const bRes = await axios.get(`${API_URL}/books`);
         setBooks(bRes.data);
@@ -49,7 +49,6 @@ function AdminPanel({ user, onLogout }) {
       setNewBook({ title: '', author: '', price: '', image_url: '', stock: '' });
       refreshData();
     } catch (err) {
-      console.error('Ekleme hatası:', err);
       alert('Kitap eklenemedi: ' + (err.response?.data?.error || err.message));
     }
   };
@@ -62,7 +61,6 @@ function AdminPanel({ user, onLogout }) {
       setEditingBook(null);
       refreshData();
     } catch (err) {
-      console.error('Güncelleme hatası:', err);
       alert('Kitap güncellenemedi: ' + (err.response?.data?.error || err.message));
     }
   };
@@ -73,7 +71,6 @@ function AdminPanel({ user, onLogout }) {
         await axios.delete(`${API_URL}/books/${id}`, { headers });
         refreshData();
       } catch (err) {
-        console.error('Silme hatası:', err);
         alert('Kitap silinemedi: ' + (err.response?.data?.error || err.message));
       }
     }
@@ -92,6 +89,7 @@ function AdminPanel({ user, onLogout }) {
   };
 
   const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_price), 0);
+
   const chartData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [{
@@ -105,6 +103,8 @@ function AdminPanel({ user, onLogout }) {
       pointBackgroundColor: '#0f172a'
     }]
   };
+
+  const displayBooks = bookStats.length > 0 ? bookStats : books;
 
   return (
     <div className="min-h-screen flex bg-[#f8f9fa] text-slate-900 font-sans">
@@ -125,8 +125,7 @@ function AdminPanel({ user, onLogout }) {
             <button
               key={item.label}
               onClick={() => setActiveTab(item.label)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${activeTab === item.label ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
-                }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${activeTab === item.label ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               <item.icon size={18} /> {item.label}
             </button>
@@ -152,13 +151,12 @@ function AdminPanel({ user, onLogout }) {
           </div>
         </header>
 
-        {/* --- HOME TAB --- */}
+        {/* HOME TAB */}
         {activeTab === 'Home' && (
           <div className="space-y-8">
-            {/* İstatistik Kartları */}
             <div className="grid grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Kitap Türü</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Kitap Sayısı</p>
                 <p className="text-3xl font-black mt-2">{books.length}</p>
               </div>
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
@@ -171,31 +169,39 @@ function AdminPanel({ user, onLogout }) {
               </div>
             </div>
 
-            {/* Kitap Tablosu */}
+            {/* Kitap Tablosu — Satış Adedi ve Gelir dahil */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-white">
-                <h3 className="font-bold text-lg">Aktif Kitap Listesi</h3>
+                <h3 className="font-bold text-lg">Kitap Satış Raporu</h3>
                 <span className="bg-slate-100 text-slate-600 text-[10px] px-3 py-1 rounded-full font-bold uppercase">Canlı Veri</span>
               </div>
               <table className="w-full text-left">
                 <thead className="bg-slate-50/50 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="px-8 py-4">Kitap Adı / Yazar</th>
-                    <th className="px-8 py-4">Fiyat</th>
-                    <th className="px-8 py-4">Stok</th>
-                    <th className="px-8 py-4 text-center">Önizleme</th>
+                    <th className="px-6 py-4">Kitap Adı / Yazar</th>
+                    <th className="px-6 py-4">Fiyat</th>
+                    <th className="px-6 py-4">Stok</th>
+                    <th className="px-6 py-4">Satış Adedi</th>
+                    <th className="px-6 py-4">Toplam Gelir</th>
+                    <th className="px-6 py-4 text-center">Görsel</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {books.map(book => (
+                  {displayBooks.map(book => (
                     <tr key={book.id} className="hover:bg-slate-50/30 transition">
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-5">
                         <div className="font-bold text-slate-900">{book.title}</div>
                         <div className="text-xs text-slate-400">{book.author}</div>
                       </td>
-                      <td className="px-8 py-5 font-black text-slate-900 text-sm">₺{book.price}</td>
-                      <td className="px-8 py-5 text-sm">{book.stock} Adet</td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-5 font-black text-slate-900 text-sm">₺{book.price}</td>
+                      <td className="px-6 py-5 text-sm">{book.stock} Adet</td>
+                      <td className="px-6 py-5 text-sm font-bold text-slate-700">
+                        {book.total_sold !== undefined ? `${book.total_sold} Adet` : '-'}
+                      </td>
+                      <td className="px-6 py-5 text-sm font-bold text-emerald-600">
+                        {book.total_revenue !== undefined ? `₺${parseFloat(book.total_revenue).toFixed(2)}` : '-'}
+                      </td>
+                      <td className="px-6 py-5">
                         <div className="flex justify-center">
                           <img src={book.image_url} alt="kapak" className="h-12 w-9 object-cover rounded shadow-sm border border-slate-100" />
                         </div>
@@ -235,7 +241,6 @@ function AdminPanel({ user, onLogout }) {
         {/* INVENTORY TAB */}
         {activeTab === 'Inventory' && (
           <div className="space-y-6">
-            {/* Yeni Kitap Ekleme Formu */}
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
               <h3 className="font-bold text-xl mb-6">{editingBook ? 'Kitap Düzenle' : 'Yeni Kitap Ekle'}</h3>
               <form onSubmit={editingBook ? handleUpdateBook : handleAddBook} className="space-y-4">
@@ -276,7 +281,6 @@ function AdminPanel({ user, onLogout }) {
               </form>
             </div>
 
-            {/* Kitaplar Listesi */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-white">
                 <h3 className="font-bold text-lg">Kitap Envanteri</h3>

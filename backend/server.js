@@ -256,6 +256,26 @@ app.get('/api/orders', authenticateToken, requireAdmin, async (req, res) => {
     }
 });
 
+// Kitap bazında satış raporu
+app.get('/api/stats/books', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                b.id, b.title, b.author, b.price, b.stock, b.image_url,
+                COALESCE(SUM(o.quantity), 0) AS total_sold,
+                COALESCE(SUM(o.total_price), 0) AS total_revenue
+            FROM books b
+            LEFT JOIN orders o ON o.book_id = b.id
+            GROUP BY b.id
+            ORDER BY b.id ASC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'İstatistik alınamadı' });
+    }
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server ${PORT} portunda başarıyla çalışıyor...`);
