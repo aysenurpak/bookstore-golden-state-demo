@@ -2,8 +2,38 @@
 
 Bu proje, bir kitapçı yönetim sistemi örneğidir. Hem yönetici (admin) hem de müşteri (customer) panelleri içerir. Proje iki ana bölümden oluşur:
 
-- **Backend**: Node.js (Express) ve PostgreSQL ile yazılmıştır.
-- **Frontend**: React, Vite ve TailwindCSS ile geliştirilmiştir.
+- **Backend:** Node.js (Express) ve PostgreSQL ile yazılmıştır.
+- **Frontend:** React, Vite ve TailwindCSS ile geliştirilmiştir.
+
+## Ekran Görüntüleri
+
+<table>
+  <tr>
+    <td align="center"><b>Login</b></td>
+    <td align="center"><b>Admin Dashboard</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/login.png" width="400"></td>
+    <td><img src="screenshots/admin-dashboard.png" width="400"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Admin Inventory</b></td>
+    <td align="center"><b>Customer Market</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/admin-inventory.png" width="400"></td>
+    <td><img src="screenshots/customer-market.png" width="400"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center"><b>Customer Cart</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/customer-cart.png" width="400"></td>
+  </tr>
+</table>
 
 ## Özellikler
 
@@ -26,7 +56,7 @@ Bu proje, bir kitapçı yönetim sistemi örneğidir. Hem yönetici (admin) hem 
 2. Gerekli veritabanı ve tabloları oluşturun.
 3. `.env` dosyasını backend klasörüne ekleyin:
 
-```env
+```
 DB_USER=postgres
 DB_PASSWORD=parolanız
 DB_HOST=localhost
@@ -94,30 +124,30 @@ bookstore-golden-state-demo/
 
 ### Backend
 
-- **express**: Web framework
-- **pg**: PostgreSQL driver
-- **cors**: Cross-Origin Resource Sharing
-- **jsonwebtoken**: JWT authentication
-- **bcrypt**: Password hashing
-- **dotenv**: Environment variables
+- **express** — Web framework
+- **pg** — PostgreSQL driver
+- **cors** — Cross-Origin Resource Sharing
+- **jsonwebtoken** — JWT authentication
+- **bcrypt** — Password hashing
+- **dotenv** — Environment variables
 
 ### Frontend
 
-- **react**: UI library
-- **react-router-dom**: Routing
-- **axios**: HTTP client
-- **tailwindcss**: CSS framework
-- **chart.js**: Charts ve grafikler
-- **vite**: Build tool
+- **react** — UI library
+- **react-router-dom** — Routing
+- **axios** — HTTP client
+- **tailwindcss** — CSS framework
+- **chart.js** — Charts ve grafikler
+- **vite** — Build tool
 
 ## API Endpoints (Örnek)
 
-- `POST /login` - Kullanıcı girişi
-- `GET /books` - Tüm kitapları getir
-- `POST /books` - Yeni kitap ekle (admin)
-- `PUT /books/:id` - Kitabı güncelle (admin)
-- `DELETE /books/:id` - Kitabı sil (admin)
-- `POST /purchase` - Kitap satın al (müşteri)
+- `POST /login` — Kullanıcı girişi
+- `GET /books` — Tüm kitapları getir
+- `POST /books` — Yeni kitap ekle (admin)
+- `PUT /books/:id` — Kitabı güncelle (admin)
+- `DELETE /books/:id` — Kitabı sil (admin)
+- `POST /purchase` — Kitap satın al (müşteri)
 
 ## Kimlik Doğrulama
 
